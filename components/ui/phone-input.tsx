@@ -40,6 +40,7 @@ const PhoneInput: React.ForwardRefExoticComponent<PhoneInputProps> =
           countrySelectComponent={CountrySelect}
           inputComponent={InputComponent}
           smartCaret={false}
+          defaultCountry="MY"
           /**
            * Handles the onChange event.
            *
@@ -105,7 +106,7 @@ const CountrySelect = ({
           />
         </Button>
       </PopoverTrigger>
-      <PopoverContent className="w-[300px] p-0">
+      <PopoverContent className="w-[300px] p-0 bg-white">
         <Command>
           <CommandInput placeholder="Search country..." />
           <CommandList>

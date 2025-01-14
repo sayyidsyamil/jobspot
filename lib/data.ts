@@ -4,6 +4,7 @@ import { sql } from '@vercel/postgres';
 import { Jobs } from '@/lib/definition';
 import {z} from 'zod';
 import { currentUser } from '@clerk/nextjs/server';
+import { redirect } from 'next/navigation';
 
 
 const formSchema = z.object({
@@ -21,7 +22,7 @@ export async function fetchJobs() {
   SELECT * FROM Jobs
   ORDER BY created_at DESC;
 `;
-    console.log("data", data);
+    
     return data;
   } catch (error) {
     console.error('Database Error:', error);
@@ -31,7 +32,7 @@ export async function fetchJobs() {
 
 export async function sendJobs(formData: FormData) {
 
-  console.log("data before",formData);
+  
   const user = await currentUser();
   const {title, description, price_range, timeline,contact_info} = formSchema.parse({
     title: formData.get('title'),
@@ -41,11 +42,12 @@ export async function sendJobs(formData: FormData) {
     contact_info: formData.get('contact_info'),
   })
 
-  console.log("data after",title,timeline);
 
     sql`
       INSERT INTO Jobs (user_id, title, description, price_range, timeline, contact_info)
       VALUES (${user?.id}, ${title}, ${description}, ${price_range}, 
               ${timeline}, ${contact_info});
     `;
+
+    redirect('/jobs')
 }

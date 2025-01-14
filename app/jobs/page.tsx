@@ -20,7 +20,7 @@ export default async function Page() {
         <Card key={job.id} className="flex flex-col">
           <CardHeader>
             <CardTitle>{job.title}</CardTitle>
-            <CardDescription>Posted {new Date(job.created_at).toLocaleDateString()}</CardDescription>
+            <CardDescription>Posted {job.created_at ? new Date(job.created_at).toLocaleDateString() : "Unknown date"}</CardDescription>
           </CardHeader>
           <CardContent className="flex-grow">
             <p className="text-sm text-gray-600 mb-4">{job.description}</p>
