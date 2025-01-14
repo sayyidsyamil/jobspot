@@ -5,12 +5,15 @@ import { useRouter } from 'next/navigation';
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import Form from 'next/form'
-
+import { sendJobs } from '@/lib/data'; // Import the sendJobs function
+import { useUser } from '@clerk/nextjs'; // Import the useUser hook from Clerk
+import Form from 'next/form';
 
 export default function PostJob() {
   const router = useRouter();
   const [loading, setLoading] = useState(false);
+  const { user } = useUser(); // Get the current user from Clerk
+
   const [formData, setFormData] = useState({
     title: '',
     description: '',
@@ -19,15 +22,45 @@ export default function PostJob() {
     contactNumber: ''
   });
 
-  const handleSubmit = async (e:any) => {
-    // e.preventDefault();
+  const handleSubmit = async (e: any) => {
+    e.preventDefault();
     setLoading(true);
 
-    console.log(formData);
+    if (!user) {
+      alert('User not authenticated');
+      setLoading(false);
+      return;
+    }
+
+    // Construct the job data to match the Jobs type
+    const jobData = {
+      user_id: user.id, // Get the user_id from Clerk
+      title: formData.title,
+      description: formData.description,
+      price_range: formData.budget,
+      timeline: formData.timeline,
+      contact_info: formData.contactNumber,
+      created_at: new Date()
+    };
 
     try {
-    
+      // Call the sendJobs function to insert the job data into the database
+      console.log("skibidi before send",jobData );
 
+      const formDataObj = new FormData();
+      formDataObj.append('user_id', jobData.user_id);
+      formDataObj.append('title', jobData.title);
+      formDataObj.append('description', jobData.description);
+      formDataObj.append('price_range', jobData.price_range);
+      formDataObj.append('timeline', jobData.timeline);
+      formDataObj.append('contact_info', jobData.contact_info);
+      formDataObj.append('created_at', jobData.created_at.toISOString());
+
+    //   await sendJobs(formDataObj);
+
+    console.log()
+
+      // Redirect to the jobs page after successful submission
       router.push('/jobs');
       router.refresh();
     } catch (error) {
@@ -42,13 +75,14 @@ export default function PostJob() {
     <div className="container mx-auto px-4 py-8">
       <div className="max-w-2xl mx-auto">
         <h1 className="text-3xl font-bold mb-8">Post a New Job</h1>
-        <Form action={handleSubmit} className="space-y-6">
+        
+        <Form action={sendJobs} className="space-y-6">
           <div>
             <label className="block text-sm font-medium mb-2">Project Title</label>
             <Input
               required
-              value={formData.title}
-              onChange={(e) => setFormData({ ...formData, title: e.target.value })}
+              name = "title"
+              type = "string"
               placeholder="e.g., Website Development for Small Business"
             />
           </div>
@@ -57,8 +91,7 @@ export default function PostJob() {
             <label className="block text-sm font-medium mb-2">Project Description</label>
             <Textarea
               required
-              value={formData.description}
-              onChange={(e) => setFormData({ ...formData, description: e.target.value })}
+              name = "description"
               placeholder="Describe your project requirements in detail..."
               className="h-32"
             />
@@ -68,8 +101,7 @@ export default function PostJob() {
             <label className="block text-sm font-medium mb-2">Budget Range</label>
             <Input
               required
-              value={formData.budget}
-              onChange={(e) => setFormData({ ...formData, budget: e.target.value })}
+              name = "price_range"
               placeholder="e.g., $500-1000"
             />
           </div>
@@ -78,8 +110,7 @@ export default function PostJob() {
             <label className="block text-sm font-medium mb-2">Timeline</label>
             <Input
               required
-              value={formData.timeline}
-              onChange={(e) => setFormData({ ...formData, timeline: e.target.value })}
+              name = "timeline"
               placeholder="e.g., 2-3 weeks"
             />
           </div>
@@ -89,8 +120,7 @@ export default function PostJob() {
             <Input
               required
               type="tel"
-              value={formData.contactNumber}
-              onChange={(e) => setFormData({ ...formData, contactNumber: e.target.value })}
+              name = "contact_info"
               placeholder="e.g., +1234567890"
             />
           </div>
